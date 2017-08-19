@@ -2,7 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use Components\Response;
+
 function index()
 {
-    response(['response' => 'it is api'], 'json');
+    Response\response(['response' => 'it is api'], 'json');
 }

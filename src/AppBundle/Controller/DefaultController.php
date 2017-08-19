@@ -2,6 +2,8 @@
 
 namespace AppBundle\Controller;
 
+use Components\Response;
+use Components\TEngine;
 use AppBundle\Service\Menu;
 
 load('AppBundle/Service/Menu');
@@ -10,15 +12,15 @@ function index()
 {
     $menu = Menu\getMenu();
 
-    $r = render('default', [
+    $r = TEngine\render('default', [
         'content' => 'it works',
         'menu' => $menu,
         'title' => 'Main'
     ]);
-    response($r);
+    Response\response($r);
 }
 
 function testRedirect()
 {
-    redirect('api');
+    Response\redirect('api');
 }

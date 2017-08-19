@@ -1,7 +1,7 @@
 <?php
 
 $components = [
-    'Loader/Loader',
+    'Ppf/Ppf',
     'Response/Response',
     'TemplateEngine/TemplateEngine',
 ];

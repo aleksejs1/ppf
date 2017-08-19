@@ -1,11 +1,13 @@
 <?php
 
+namespace Components\Response;
+
+use Components\Ppf;
+
 function response($data, $format = null)
 {
-    global $config;
-
     if (!$format) {
-        $format = $config['format'];
+        $format = Ppf\getConfig('format');
     }
 
     if ($format === 'json') {
