@@ -1,24 +1,54 @@
 <?php
 
-use Components\Response;
-
-require __DIR__ . '/../app/config/config.php';
-require __DIR__.'/../app/appKernel.php';
-
-set_error_handler("errorHandler");
-register_shutdown_function("shutdownHandler");
-
+set_error_handler('errorHandler');
+register_shutdown_function('shutdownHandler');
 error_reporting(E_ALL);
-ini_set("display_errors", 0);
+ini_set('display_errors', 0);
 
-foreach ($components as $component)
+include __DIR__ . '/../app/config/config.php';
+include __DIR__.'/../app/appKernel.php';
+
+loadComponents();
+
+
+function loadComponents() : void
 {
-    require __DIR__.'/../components/'.$component.'.php';
+    foreach (getComponents() as $component)
+    {
+        $file = getComponentPath($component);
+        if (!file_exists($file)) {
+            trigger_error('Componen '.$component.' not found!' ,E_USER_ERROR);
+        }
+        include $file;
+    }
 }
 
-function load($what)
+function getComponentPath(string $component) : string
 {
-    include __DIR__.'/../src/'.$what.'.php';
+    if (!$component || $component === '') {
+        trigger_error('Wrong component array configuration!' ,E_USER_ERROR);
+    }
+
+    return __DIR__.'/../components/'.$component.'.php';
+}
+
+function load(string $module) : void
+{
+    $file = getModulePath($module);
+    if (!file_exists($file)) {
+        trigger_error('Module '.$module.' not found!' ,E_USER_ERROR);
+    }
+    include $file;
+}
+
+
+function getModulePath(string $module) : string
+{
+    if (!$module || $module === '') {
+        trigger_error('Attempt to load empty module!' ,E_USER_ERROR);
+    }
+
+    return __DIR__.'/../src/'.$module.'.php';
 }
 
 
@@ -67,15 +97,14 @@ function shutdownHandler()
         case E_CORE_WARNING:
         case E_COMPILE_WARNING:
         case E_PARSE:
-            $error = '[SHUTDOWN] Level:'.$lasterror['type'].'; Message:'.$lasterror['message'].' (File:'.
+            $error = '[FATAL] Level:'.$lasterror['type'].'; Message:'.$lasterror['message'].' (File:'.
                 $lasterror['file'].' : '.$lasterror['line'].')';
             ppfLog($error, 'fatal');
     }
 }
 
-function ppfLog($error, $errlvl)
+function ppfLog($error, $errorLevel)
 {
-    Response\responseWithCode($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', 500);
-    print('500! ' . $error);
+    print('500! ' . $errorLevel . ': ' . $error);
     exit;
 }

@@ -5,3 +5,10 @@ $components = [
     'Response/Response',
     'TemplateEngine/TemplateEngine',
 ];
+
+function getComponents()
+{
+    global $components;
+
+    return $components;
+}
