@@ -10,6 +10,7 @@ include __DIR__.'/../app/appKernel.php';
 
 loadComponents();
 
+\Components\Events\addListener('pre_response', '\Components\Ppf\preResp');
 
 function loadComponents() : void
 {

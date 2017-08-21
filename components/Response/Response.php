@@ -3,9 +3,12 @@
 namespace Components\Response;
 
 use Components\Ppf;
+use Components\Events;
 
 function response($data, $format = null)
 {
+    Events\doEvent('pre_response', 'test');
+
     if (!$format) {
         $format = Ppf\getConfig('format');
     }

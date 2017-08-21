@@ -4,6 +4,7 @@ $components = [
     'Ppf/Ppf',
     'Response/Response',
     'TemplateEngine/TemplateEngine',
+    'EventDispatcher/Events',
 ];
 
 function getComponents()

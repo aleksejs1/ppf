@@ -8,3 +8,8 @@ function getConfig($key)
 
     return $config[$key];
 }
+
+function preResp($data)
+{
+    error_log($data);
+}
