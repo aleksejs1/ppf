@@ -33,3 +33,8 @@ function redirect($url)
     header('Location: '.$url);
     exit;
 }
+
+function responseWithCode($message, $status)
+{
+    header($message, true, $status);
+}

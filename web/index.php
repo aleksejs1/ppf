@@ -10,6 +10,6 @@ if (!array_key_exists($current_route, $routes)) {
     Response\response('404');
 }
 
-load($routes[$current_route][0].'/Controller/'.$routes[$current_route][1].'Controller');
-call_user_func($routes[$current_route][0].'\\'.'Controller\\'.$routes[$current_route][2]);
+load($routes[$current_route][0] . '/Controller/' . $routes[$current_route][1] . 'Controller');
+call_user_func($routes[$current_route][0] . '\\' . 'Controller\\' . $routes[$current_route][2]);
 
