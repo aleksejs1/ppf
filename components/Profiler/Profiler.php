@@ -11,7 +11,7 @@ function saveStart()
     $timestamps['start'] = round(microtime(true) * 1000);
 }
 
-function saveEnd()
+function saveEnd(&$data)
 {
     global $timestamps;
 
@@ -19,5 +19,7 @@ function saveEnd()
 
     $fullTime = $timestamps['end'] - $timestamps['start'];
 
-    echo '<div style="position: fixed; bottom: 0px; width: 100%; background: beige;">Full execution time: '.$fullTime.' ms</div>';
+    if($data[0] === 'html') {
+        $data[1] .= '<div style="position: fixed; bottom: 0px; width: 100%; background: beige;">Full execution time: '.$fullTime.' ms</div>';
+    }
 }

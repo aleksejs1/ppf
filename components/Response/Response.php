@@ -42,6 +42,7 @@ function responseWithCode($message, $status)
 
 function sendResponse($response)
 {
+    Events\doEvent('kernel_response', $response);
     $responseType = $response[0];
     $data = $response[1];
     if ($responseType === 'html') {
@@ -58,8 +59,6 @@ function sendResponse($response)
     } else if ($responseType === 'redirect') {
         header('Location: '.$data);
     }
-
-    Events\doEvent('kernel_response', $response);
 
     exit;
 }

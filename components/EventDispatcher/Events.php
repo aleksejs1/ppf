@@ -15,7 +15,7 @@ function addListener($event, $listener)
     $events[$event][] = $listener;
 }
 
-function doEvent($event, $data)
+function doEvent($event, &$data)
 {
     global $events;
 
@@ -23,6 +23,6 @@ function doEvent($event, $data)
         return;
     }
     foreach ($events[$event] as $listener) {
-        call_user_func($listener, $data);
+        call_user_func_array($listener, [&$data]);
     }
 }
