@@ -1,20 +1,27 @@
 <?php
 
-set_error_handler('errorHandler');
-register_shutdown_function('shutdownHandler');
+namespace Components\HttpKernel;
+
+set_error_handler('Components\HttpKernel\errorHandler');
+register_shutdown_function('Components\HttpKernel\shutdownHandler');
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-include __DIR__ . '/../app/config/config.php';
-include __DIR__.'/../app/appKernel.php';
+include __DIR__ . '/../../app/config/config.php';
 
-loadComponents();
-
-\Components\Events\addListener('pre_response', '\Components\Ppf\preResp');
-
-function loadComponents() : void
+function getFromGlobals()
 {
-    foreach (getComponents() as $component)
+    return [
+        'server' => $_SERVER,
+    ];
+}
+
+function handle($request)
+{
+    $components = [];
+    include __DIR__.'/../../app/appKernel.php';
+
+    foreach ($components as $component)
     {
         $file = getComponentPath($component);
         if (!file_exists($file)) {
@@ -22,6 +29,10 @@ function loadComponents() : void
         }
         include $file;
     }
+
+    \Components\Events\addListener('pre_response', '\Components\Ppf\preResp');
+
+    return \Components\HttpKernel\httpHandle($request);
 }
 
 function getComponentPath(string $component) : string
@@ -30,28 +41,8 @@ function getComponentPath(string $component) : string
         trigger_error('Wrong component array configuration!' ,E_USER_ERROR);
     }
 
-    return __DIR__.'/../components/'.$component.'.php';
+    return __DIR__.'/../../components/'.$component.'.php';
 }
-
-function load(string $module) : void
-{
-    $file = getModulePath($module);
-    if (!file_exists($file)) {
-        trigger_error('Module '.$module.' not found!' ,E_USER_ERROR);
-    }
-    include $file;
-}
-
-
-function getModulePath(string $module) : string
-{
-    if (!$module || $module === '') {
-        trigger_error('Attempt to load empty module!' ,E_USER_ERROR);
-    }
-
-    return __DIR__.'/../src/'.$module.'.php';
-}
-
 
 function errorHandler($error_level, $error_message, $error_file, $error_line, $error_context)
 {

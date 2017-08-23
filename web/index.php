@@ -1,15 +1,11 @@
 <?php
 
 use Components\Response;
+use Components\HttpKernel;
 
-require __DIR__.'/../app/kernel.php';
+require __DIR__.'/../app/loader.php';
+require __DIR__.'/../components/HttpKernel/Kernel.php';
 
-$current_route = str_replace($_SERVER['REDIRECT_BASE'].'/', '', $_SERVER['REDIRECT_URL']);
-
-if (!array_key_exists($current_route, $routes)) {
-    Response\response('404');
-}
-
-load($routes[$current_route][0] . '/Controller/' . $routes[$current_route][1] . 'Controller');
-call_user_func($routes[$current_route][0] . '\\' . 'Controller\\' . $routes[$current_route][2]);
-
+$request = HttpKernel\getFromGlobals();
+$response = HttpKernel\handle($request);
+Response\sendResponse($response);

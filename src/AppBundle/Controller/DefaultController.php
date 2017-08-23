@@ -16,16 +16,16 @@ function index()
         'menu' => $menu,
         'title' => 'Main'
     ]);
-    Response\response($r);
+    return Response\response($r);
 }
 
 function testError()
 {
     trigger_error('Error',E_USER_ERROR);
-    Response\response('');
+    return Response\response('');
 }
 
 function testRedirect()
 {
-    Response\redirect('api');
+    return Response\redirect('api');
 }

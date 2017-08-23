@@ -6,5 +6,5 @@ use Components\Response;
 
 function index()
 {
-    Response\response(['response' => 'it is api'], 'json');
+    return Response\response(['response' => 'it is api'], 'json');
 }

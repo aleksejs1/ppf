@@ -2,6 +2,7 @@
 
 $components = [
     'Ppf/Ppf',
+    'HttpKernel/HttpKernel',
     'Response/Response',
     'TemplateEngine/TemplateEngine',
     'EventDispatcher/Events',

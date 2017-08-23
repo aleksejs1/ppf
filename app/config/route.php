@@ -6,3 +6,10 @@ $routes = [
     'api' => ['AppBundle','Api','index'],
     'err' => ['AppBundle','Default','testError'],
 ];
+
+function getRoutes()
+{
+    global $routes;
+
+    return $routes;
+}
