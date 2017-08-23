@@ -8,6 +8,13 @@ function httpHandle ($request)
 {
     Events\doEvent('kernel_request', $request);
 
+    if (empty($request['server']['REDIRECT_BASE'])) {
+        $request['server']['REDIRECT_BASE'] = '';
+    }
+    if (empty($request['server']['REDIRECT_URL'])) {
+        $request['server']['REDIRECT_URL'] = '';
+    }
+
     $current_route = str_replace($request['server']['REDIRECT_BASE'].'/', '', $request['server']['REDIRECT_URL']);
     $routes = getRoutes();
     if (!array_key_exists($current_route, $routes)) {
