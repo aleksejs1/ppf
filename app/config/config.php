@@ -8,3 +8,4 @@ $config = [
 ];
 
 include __DIR__ . '/../../app/config/route.php';
+include __DIR__ . '/../../app/config/services.php';

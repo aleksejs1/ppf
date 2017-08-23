@@ -5,6 +5,7 @@ $components = [
     'HttpKernel/HttpKernel',
     'Response/Response',
     'TemplateEngine/TemplateEngine',
+    'Profiler/Profiler',
     'EventDispatcher/Events',
 ];
 

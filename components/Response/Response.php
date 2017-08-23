@@ -59,5 +59,7 @@ function sendResponse($response)
         header('Location: '.$data);
     }
 
+    Events\doEvent('kernel_response', $response);
+
     exit;
 }
