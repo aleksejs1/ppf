@@ -1,0 +1,9 @@
+{
+  "name": "aleksejs1/framework-standard-edition",
+  "license": "MIT",
+  "type": "project",
+  "description": "Procedural PHP Framework standard edition",
+  "require": {
+    "php": "^7.1"
+  }
+}
