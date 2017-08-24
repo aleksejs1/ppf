@@ -7,6 +7,7 @@ $components = [
     'TemplateEngine/TemplateEngine',
     'Profiler/Profiler',
     'EventDispatcher/Events',
+    'Database/Database',
 ];
 
 function getComponents()
