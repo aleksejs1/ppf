@@ -4,29 +4,31 @@ namespace Components\Database;
 
 use Components\Ppf;
 
-$db_connection = mysqli_connect(
-    Ppf\getConfig('database_host'),
-    Ppf\getConfig('database_user'),
-    Ppf\getConfig('database_pass'),
-    Ppf\getConfig('database_name')
-);
+$databaseConnectionParams = Ppf\getConfig('database');
 
-if (!$db_connection) {
-    echo 'No connection!';
+if ($databaseConnectionParams) {
+    $db_connection = mysqli_connect(
+        $databaseConnectionParams['host'],
+        $databaseConnectionParams['user'],
+        $databaseConnectionParams['pass'],
+        $databaseConnectionParams['name']
+    );
+
+    if (!$db_connection) {
+        echo 'No connection!';
+    }
+
+    $dbStructureFile = __DIR__ . '/../../var/cache/db_structure.php';
+    if (!file_exists($dbStructureFile)) {
+        $var_str = var_export(getDbStructure($db_connection), true);
+        $var = "<?php\n\n\$db_structure = $var_str;\n\n?>";
+        file_put_contents($dbStructureFile, $var);
+    }
+
+    include $dbStructureFile;
+
+    mysqli_close($db_connection);
 }
-
-$dbStructureFile = __DIR__ . '/../../var/cache/db_structure.php';
-if (!file_exists($dbStructureFile)) {
-    $var_str = var_export(getDbStructure($db_connection), true);
-    $var = "<?php\n\n\$db_structure = $var_str;\n\n?>";
-    file_put_contents($dbStructureFile, $var);
-}
-
-include $dbStructureFile;
-
-
-
-mysqli_close($db_connection);
 
 function getDbStructure($db_connection) {
     if ($result = mysqli_query($db_connection, 'SHOW TABLES;')) {
@@ -76,11 +78,12 @@ function setRelationData($db_connection, &$db_structure)
 
 function getForeignKeysData($db_connection)
 {
+//    $data = [];
     foreach (getForeignKeys($db_connection) as $key) {
         $sql = 'SELECT * FROM information_schema.key_column_usage 
                 WHERE CONSTRAINT_NAME = \''.$key[2].'\' AND 
                 TABLE_NAME = \''.$key[4].'\' 
-                AND TABLE_SCHEMA = \'' . Ppf\getConfig('database_name') . '\'';
+                AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
         if ($result = mysqli_query($db_connection, $sql)) {
             $data = mysqli_fetch_all($result);
         }
@@ -91,8 +94,9 @@ function getForeignKeysData($db_connection)
 
 function getForeignKeys($db_connection)
 {
+    $keys = [];
     $sql = 'SELECT * FROM information_schema.table_constraints 
-            WHERE CONSTRAINT_TYPE = \'FOREIGN KEY\' AND TABLE_SCHEMA = \'' . Ppf\getConfig('database_name') . '\'';
+            WHERE CONSTRAINT_TYPE = \'FOREIGN KEY\' AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
     if ($result = mysqli_query($db_connection, $sql)) {
         $keys = mysqli_fetch_all($result);
     }

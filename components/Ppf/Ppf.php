@@ -6,7 +6,11 @@ function getConfig($key)
 {
     global $config;
 
-    return $config[$key];
+    if (array_key_exists($key, $config)) {
+        return $config[$key];
+    }
+
+    return false;
 }
 
 function preResp($data)
