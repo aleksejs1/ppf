@@ -56,3 +56,8 @@ function getDbConnection($close = false)
 
     return $db_connection;
 }
+
+function escape($variable)
+{
+    return mysqli_real_escape_string(getDbConnection(), $variable);
+}

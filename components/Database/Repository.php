@@ -37,7 +37,7 @@ function renderWhereString($tableStructure, $data)
     $where = '';
     foreach ($tableStructure['id'] as $key => $field) {
         if (array_key_exists($key, $data)) {
-            $where .= ' `' . $key . '` = \'' . $data[$key] . '\' AND ';
+            $where .= ' `' . $key . '` = \'' . escape($data[$key]) . '\' AND ';
         }
     }
     if ($where !== '') {
@@ -52,7 +52,7 @@ function renderSetString($tableStructure, $data)
     $set = '';
     foreach ($tableStructure['fields'] as $key => $field) {
         if (array_key_exists($key, $data)) {
-            $set .= ' `' . $key . '` = \'' . $data[$key] . '\' AND ';
+            $set .= ' `' . $key . '` = \'' . escape($data[$key]) . '\' AND ';
         }
     }
     if ($set !== '') {
