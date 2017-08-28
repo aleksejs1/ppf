@@ -15,6 +15,18 @@ function index()
     $r = TEngine\render('default', [
         'content' => 'it works',
         'menu' => $menu,
+        'menu2' => [
+            [
+                'link' => 'aaa',
+                'title' => 'bbb',
+                'menu2in' => [
+                    [
+                        'link' => 'aaa2',
+                        'title' => 'bbb2',
+                    ]
+                ]
+            ]
+        ],
         'title' => 'Main'
     ]);
 
