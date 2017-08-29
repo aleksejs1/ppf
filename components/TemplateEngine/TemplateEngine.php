@@ -2,48 +2,160 @@
 
 namespace Components\TEngine;
 
-function render($template, $data, $blocks = [])
+function render($templateName, $data)
 {
-    $file = __DIR__.'/../../app/Resources/views/'.$template.'.html';
-    if (!file_exists($file)) {
-        trigger_error('Template '.$file.' not found!' ,E_USER_ERROR);
-    }
-    $result = file_get_contents($file);
+    $filePath = getFilePath($templateName);
+    $template = file_get_contents($filePath);
+    $parsedTemplate = parseTemplate($template, $data);
 
-    $result = doInclude($result);
-
-    $result = parseTemplate($result, $data, $blocks);
-
-    $result = cleanTags($result);
-
-    return $result;
+    return cleanUnparsedTags($parsedTemplate);
 }
 
-function parseTemplate($template, $data, $blocks = [])
+function getFilePath($templateName)
 {
-    $parsedString = $template;
-
-    $parsedString = replaceTemplateBlocksToDefined($parsedString, $blocks);
-
-    if (substr(trim($template),0,10) === '{{extends ' ) {
-        $parent = substr(trim($template),10,strpos($template, '}}') - 10);
-        $parsedString = preg_replace_callback(
-            '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
-            function ($matches) use  (&$blocks) {
-                $keyEndPosition = strpos($matches[1], '}}');
-                $key = trim(substr($matches[1], 0, $keyEndPosition));
-                $templatePart = substr($matches[1], $keyEndPosition+2);
-                $blocks[$key] = $templatePart;
-
-                return '';
-            },
-            $parsedString);
-
-        return render($parent, $data, $blocks);
+    $path = __DIR__.'/../../app/Resources/views/'.$templateName.'.html';
+    if (!file_exists($path)) {
+        trigger_error('Template '.$path.' not found!' ,E_USER_ERROR);
     }
 
+    return $path;
+}
 
-    $parsedString = preg_replace_callback(
+function parseTemplate($template, $data)
+{
+    $template = parseIncludes($template);
+    $template = replaceTemplateBlocksToDefined($template, getBlocksData($data));
+
+    if (isTemplateExtension($template)) {
+        $blocks = getBlocks($template, getBlocksData($data));
+        $template = getExtensionName($template);
+        $data = setBlocksData($data, $blocks);
+
+        return render($template, $data);
+    }
+
+    $template = parseLoops($template, $data);
+    $template = parseVariables($template, $data);
+
+    return $template;
+}
+
+
+function parseIncludes($template)
+{
+    return preg_replace_callback(
+        '/({{include[^}}]*\/}})/',
+        function ($matches) {
+            $templateName = getTemplateNameFromTag($matches[0]);
+            $filePath = getFilePath($templateName);
+            $includedTemplate = file_get_contents($filePath);
+
+            return parseIncludes($includedTemplate);
+        },
+        $template);
+}
+
+function getTemplateNameFromTag($rawTag)
+{
+    return trim(rtrim(ltrim($rawTag, '{{include'),'/}}'));
+}
+
+function replaceTemplateBlocksToDefined($template, $blocks)
+{
+    return preg_replace_callback(
+        '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
+        function ($matches) use  ($blocks) {
+            $key = getKeyFromRawTag($matches[1]);
+            $templatePart = getTemplatePartFromRawTag($matches[1]);
+
+            if (hasBlockInBlocks($key, $blocks)) {
+                $block = insertIntoBlockParentBlocks($blocks[$key], $templatePart);
+
+                return makeRawBlock($key, $block);
+            }
+
+            return makeRawBlock($key,$templatePart);
+        },
+        $template);
+}
+
+function getKeyFromRawTag($rawTag)
+{
+    return trim(substr($rawTag, 0, getKeyEndPosition($rawTag)));
+}
+
+function getKeyEndPosition($rawTag)
+{
+    return strpos($rawTag, '}}');
+}
+
+function getTemplatePartFromRawTag($rawTag)
+{
+    return substr($rawTag, getKeyEndPosition($rawTag) + 2);
+}
+
+function hasBlockInBlocks($key, $blocks)
+{
+    return array_key_exists($key, $blocks);
+}
+
+function makeRawBlock($blockName, $blockBody)
+{
+    return '{{block '.$blockName.'}}'.$blockBody.'{{/block}}';
+}
+
+function insertIntoBlockParentBlocks($block, $parent)
+{
+    return strtr ($block, array ('{{parent()}}' => $parent));
+}
+
+function isTemplateExtension($template)
+{
+    return substr(trim($template),0,10) === '{{extends ';
+}
+
+function getBlocks($template, $blocks)
+{
+    preg_replace_callback(
+        '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
+        function ($matches) use  (&$blocks) {
+            $key = getKeyFromRawTag($matches[1]);
+            $templatePart = getTemplatePartFromRawTag($matches[1]);
+            $blocks[$key] = $templatePart;
+
+            return '';
+        },
+        $template);
+
+    return $blocks;
+}
+
+function getBlocksData($data)
+{
+    if (!array_key_exists('__blocks', $data)) {
+        $data['__blocks'] = [];
+    }
+
+    return $data['__blocks'];
+}
+
+function getExtensionName($template)
+{
+    $template = trim($template);
+
+    return substr($template,10,strpos($template, '}}') - 10);
+}
+
+function setBlocksData($data, $blocks)
+{
+    $data['__blocks'] = $blocks;
+
+    return $data;
+}
+
+function parseLoops($template, $data)
+{
+    return preg_replace_callback(
         '/{{for(\b(?:(?R)|(?:(?!{{\/?for).))*){{\/for}}/is',
         function ($matches) use  ($data) {
             $parsedPart = '';
@@ -57,10 +169,12 @@ function parseTemplate($template, $data, $blocks = [])
 
             return $parsedPart;
         },
-        $parsedString);
+        $template);
+}
 
-
-    $parsedString =  preg_replace_callback(
+function parseVariables($template, $data)
+{
+    return preg_replace_callback(
         '/\{{2}(.*?)\}{2}/is',
         function ($matches) use ($data) {
             $key = trim($matches[1]);
@@ -71,35 +185,10 @@ function parseTemplate($template, $data, $blocks = [])
 
             return '{{'.$key.'}}';
         },
-        $parsedString);
-
-    return $parsedString;
-}
-
-function replaceTemplateBlocksToDefined($template, $blocks)
-{
-    return preg_replace_callback(
-        '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
-        function ($matches) use  ($blocks) {
-            $keyEndPosition = strpos($matches[1], '}}');
-            $key = trim(substr($matches[1], 0, $keyEndPosition));
-            $templatePart = substr($matches[1], $keyEndPosition+2);
-
-            if (array_key_exists($key, $blocks)) {
-                return '{{block '.$key.'}}'.insertIntoBlockParentBlocks($blocks[$key], $templatePart).'{{/block}}';
-            }
-
-            return '{{block '.$key.'}}'.$templatePart.'{{/block}}';
-        },
         $template);
 }
 
-function insertIntoBlockParentBlocks($block, $parent)
-{
-    return strtr ($block, array ('{{parent()}}' => $parent));
-}
-
-function cleanTags($parsedString)
+function cleanUnparsedTags($parsedString)
 {
     $parsedString =  preg_replace_callback(
         '/\{{2}(.*?)\}{2}/is',
@@ -107,26 +196,6 @@ function cleanTags($parsedString)
             return '';
         },
         $parsedString);
-
-    return $parsedString;
-}
-
-function doInclude($template)
-{
-    $parsedString = preg_replace_callback(
-        '/({{include[^}}]*\/}})/',
-        function ($matches) {
-            $template = trim(rtrim(ltrim($matches[0], '{{include'),'/}}'));
-            $file = __DIR__.'/../../app/Resources/views/'.$template.'.html';
-            if (!file_exists($file)) {
-                trigger_error('Template '.$file.' not found!' ,E_USER_ERROR);
-            }
-            $result = file_get_contents($file);
-            $result = doInclude($result);
-
-            return $result;
-        },
-        $template);
 
     return $parsedString;
 }
