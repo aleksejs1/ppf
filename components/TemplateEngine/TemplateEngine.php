@@ -2,7 +2,7 @@
 
 namespace Components\TEngine;
 
-function render($template, $data)
+function render($template, $data, $blocks = [])
 {
     $file = __DIR__.'/../../app/Resources/views/'.$template.'.html';
     if (!file_exists($file)) {
@@ -12,15 +12,37 @@ function render($template, $data)
 
     $result = doInclude($result);
 
-    $result = parseTemplate($result, $data);
+    $result = parseTemplate($result, $data, $blocks);
 
     $result = cleanTags($result);
 
     return $result;
 }
 
-function parseTemplate($template, $data)
+function parseTemplate($template, $data, $blocks = [])
 {
+    $parsedString = $template;
+
+    $parsedString = replaceTemplateBlocksToDefined($parsedString, $blocks);
+
+    if (substr(trim($template),0,10) === '{{extends ' ) {
+        $parent = substr(trim($template),10,strpos($template, '}}') - 10);
+        $parsedString = preg_replace_callback(
+            '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
+            function ($matches) use  (&$blocks) {
+                $keyEndPosition = strpos($matches[1], '}}');
+                $key = trim(substr($matches[1], 0, $keyEndPosition));
+                $templatePart = substr($matches[1], $keyEndPosition+2);
+                $blocks[$key] = $templatePart;
+
+                return '';
+            },
+            $parsedString);
+
+        return render($parent, $data, $blocks);
+    }
+
+
     $parsedString = preg_replace_callback(
         '/{{for(\b(?:(?R)|(?:(?!{{\/?for).))*){{\/for}}/is',
         function ($matches) use  ($data) {
@@ -35,7 +57,7 @@ function parseTemplate($template, $data)
 
             return $parsedPart;
         },
-        $template);
+        $parsedString);
 
 
     $parsedString =  preg_replace_callback(
@@ -52,6 +74,29 @@ function parseTemplate($template, $data)
         $parsedString);
 
     return $parsedString;
+}
+
+function replaceTemplateBlocksToDefined($template, $blocks)
+{
+    return preg_replace_callback(
+        '/{{block(\b(?:(?R)|(?:(?!{{\/?block).))*){{\/block}}/is',
+        function ($matches) use  ($blocks) {
+            $keyEndPosition = strpos($matches[1], '}}');
+            $key = trim(substr($matches[1], 0, $keyEndPosition));
+            $templatePart = substr($matches[1], $keyEndPosition+2);
+
+            if (array_key_exists($key, $blocks)) {
+                return '{{block '.$key.'}}'.insertIntoBlockParentBlocks($blocks[$key], $templatePart).'{{/block}}';
+            }
+
+            return '{{block '.$key.'}}'.$templatePart.'{{/block}}';
+        },
+        $template);
+}
+
+function insertIntoBlockParentBlocks($block, $parent)
+{
+    return strtr ($block, array ('{{parent()}}' => $parent));
 }
 
 function cleanTags($parsedString)
