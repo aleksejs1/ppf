@@ -1,11 +1,15 @@
 Procedural PHP Framework (PPF)
 =============================
 
+**Framework under development.**
+
 Welcome to the PPF.
 
-Framework under development.
+_Based on [symfony](http://symfony.com) structure._
 
 ## Installation
+
+**Framework under development.**
 
 Installation using [composer](http://getcomposer.org).
 Type in your console:
@@ -21,7 +25,11 @@ What's inside?
 
   * Own template engine;
 
-  * Function loader;
+  * Database component;
+  
+  * Profiler component;
+  
+  * Event component
 
   * Demo controllers;
 
