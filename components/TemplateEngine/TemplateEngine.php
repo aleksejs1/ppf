@@ -101,6 +101,10 @@ function hasBlockInBlocks($key, $blocks)
 
 function makeRawBlock($blockName, $blockBody)
 {
+    if ($blockName === '') {
+        trigger_error('Can\'t to create block without name' ,E_USER_ERROR);
+    }
+
     return '{{block '.$blockName.'}}'.$blockBody.'{{/block}}';
 }
 
