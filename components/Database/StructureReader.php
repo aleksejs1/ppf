@@ -5,14 +5,14 @@ namespace Components\Database;
 use Components\Ppf;
 
 function getDbStructure() {
-    $db_connection = getDbConnection();
-    if ($result = mysqli_query($db_connection, 'SHOW TABLES;')) {
-        $tables = mysqli_fetch_all($result);
-        mysqli_free_result($result);
+    $dbConnection = getDbConnection();
+    if ($result = dbQuery($dbConnection, 'SHOW TABLES;')) {
+        $tables = dbFetchAll($result);
+        dbFreeResult($result);
     }
     foreach ($tables as $table) {
-        if ($result = mysqli_query($db_connection, 'SHOW COLUMNS FROM ' . $table[0])) {
-            $fields = mysqli_fetch_all($result);
+        if ($result = dbQuery($dbConnection, 'SHOW COLUMNS FROM ' . $table[0])) {
+            $fields = dbFetchAll($result);
         }
         $tableStructure = [
             'type' => 'table',
@@ -24,15 +24,15 @@ function getDbStructure() {
         $dbStructure[$table[0]] = $tableStructure;
     }
 
-    setRelationData($db_connection, $dbStructure);
+    setRelationData($dbConnection, $dbStructure);
 
     return $dbStructure;
 }
 
-function setRelationData($db_connection, &$db_structure)
+function setRelationData($dbConnection, &$dbStructure)
 {
-    foreach (getForeignKeysData($db_connection) as $keyData) {
-        $db_structure[$keyData[5]]['manyToOne'][] = [
+    foreach (getForeignKeysData($dbConnection) as $keyData) {
+        $dbStructure[$keyData[5]]['manyToOne'][] = [
             $keyData[6] => [
                 'targerTable' => $keyData[10],
                 'inversedBy' => $keyData[11],
@@ -42,7 +42,7 @@ function setRelationData($db_connection, &$db_structure)
                 ]
             ]
         ];
-        $db_structure[$keyData[10]]['oneToMany'][] = [
+        $dbStructure[$keyData[10]]['oneToMany'][] = [
             $keyData[11] => [
                 'targerTable' => $keyData[5],
                 'mappedBy' => $keyData[6]
@@ -51,29 +51,29 @@ function setRelationData($db_connection, &$db_structure)
     }
 }
 
-function getForeignKeysData($db_connection)
+function getForeignKeysData($dbConnection)
 {
 //    $data = [];
-    foreach (getForeignKeys($db_connection) as $key) {
+    foreach (getForeignKeys($dbConnection) as $key) {
         $sql = 'SELECT * FROM information_schema.key_column_usage 
                 WHERE CONSTRAINT_NAME = \''.$key[2].'\' AND 
                 TABLE_NAME = \''.$key[4].'\' 
                 AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
-        if ($result = mysqli_query($db_connection, $sql)) {
-            $data = mysqli_fetch_all($result);
+        if ($result = dbQuery($dbConnection, $sql)) {
+            $data = dbFetchAll($result);
         }
     }
 
     return $data;
 }
 
-function getForeignKeys($db_connection)
+function getForeignKeys($dbConnection)
 {
     $keys = [];
     $sql = 'SELECT * FROM information_schema.table_constraints 
             WHERE CONSTRAINT_TYPE = \'FOREIGN KEY\' AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
-    if ($result = mysqli_query($db_connection, $sql)) {
-        $keys = mysqli_fetch_all($result);
+    if ($result = dbQuery($dbConnection, $sql)) {
+        $keys = dbFetchAll($result);
     }
 
     return $keys;

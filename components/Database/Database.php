@@ -23,30 +23,30 @@ if ($databaseConnectionParams) {
 
 function closeDbConnection()
 {
-    $db_connection = getDbConnection(true);
+    $dbConnection = getDbConnection(true);
 }
 
 function getDbConnection($close = false)
 {
-    static $db_connection = false;
+    static $dbConnection = false;
 
     if ($close) {
-        if ($db_connection) {
-            mysqli_close($db_connection);
-            $db_connection = false;
+        if ($dbConnection) {
+            dbClose($dbConnection);
+            $dbConnection = false;
         }
 
         return true;
     }
 
-    if ($db_connection) {
-        return $db_connection;
+    if ($dbConnection) {
+        return $dbConnection;
     }
 
     $databaseConnectionParams = Ppf\getConfig('database');
 
     if ($databaseConnectionParams) {
-        $db_connection = mysqli_connect(
+        $dbConnection = dbConnect(
             $databaseConnectionParams['host'],
             $databaseConnectionParams['user'],
             $databaseConnectionParams['pass'],
@@ -54,10 +54,10 @@ function getDbConnection($close = false)
         );
     }
 
-    return $db_connection;
+    return $dbConnection;
 }
 
 function escape($variable)
 {
-    return mysqli_real_escape_string(getDbConnection(), $variable);
+    return dbRealEscapeString(getDbConnection(), $variable);
 }

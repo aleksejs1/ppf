@@ -4,12 +4,12 @@ namespace Components\Database;
 
 function fetchOne($table, $id)
 {
-    $db_connection = getDbConnection();
+    $dbConnection = getDbConnection();
     $structure = getStructure();
     $tableStructure = $structure[$table];
     $sql = 'SELECT * FROM `'.$tableStructure['table'] . '` ' . renderWhereString($tableStructure, ['id' => $id]);
-    if ($result = mysqli_query($db_connection, $sql)) {
-        return mysqli_fetch_row($result);
+    if ($result = dbQuery($dbConnection, $sql)) {
+        return dbFetchRow($result);
     }
 
     return false;
@@ -17,7 +17,7 @@ function fetchOne($table, $id)
 
 function save($table, $data)
 {
-    $db_connection = getDbConnection();
+    $dbConnection = getDbConnection();
     $structure = getStructure();
     $tableStructure = $structure[$table];
 
@@ -29,7 +29,7 @@ function save($table, $data)
     } else {
         $sql = 'INSERT INTO `'.$tableStructure['table'] . '` ' . renderSetString($tableStructure, $data);
     }
-    mysqli_query($db_connection, $sql);
+    dbQuery($dbConnection, $sql);
 }
 
 function renderWhereString($tableStructure, $data)
