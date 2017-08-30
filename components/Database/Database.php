@@ -4,21 +4,43 @@ namespace Components\Database;
 
 use Components\Ppf;
 
+componentLoad('Database/MySqlDriver');
+componentLoad('Database/QueryBuilder');
 componentLoad('Database/Repository');
 componentLoad('Database/StructureReader');
 
-$databaseConnectionParams = Ppf\getConfig('database');
+// todo: make constructor
+initDatabase();
 
-if ($databaseConnectionParams) {
+function initDatabase()
+{
+    $databaseConnectionParams = Ppf\getConfig('database');
 
-    $dbStructureFile = __DIR__ . '/../../var/cache/db_structure.php';
+    if ($databaseConnectionParams) {
+        prepareDbStructureConfig();
+    }
+}
+
+function prepareDbStructureConfig()
+{
+    $dbStructureFile = getDbStructureFilePath();
     if (!file_exists($dbStructureFile)) {
-        $var_str = var_export(getDbStructure(), true);
-        $var = "<?php\n\nfunction getStructure()\n{\n return $var_str;\n}\n\n?>";
-        file_put_contents($dbStructureFile, $var);
+        createDbStructureFile($dbStructureFile);
     }
 
     include $dbStructureFile;
+}
+
+function getDbStructureFilePath()
+{
+    return __DIR__ . '/../../var/cache/db_structure.php';
+}
+
+function createDbStructureFile($dbStructureFile)
+{
+    $var_str = var_export(getDbStructure(), true);
+    $var = "<?php\n\nfunction getStructure()\n{\n return $var_str;\n}\n\n?>";
+    file_put_contents($dbStructureFile, $var);
 }
 
 function closeDbConnection()
@@ -44,7 +66,6 @@ function getDbConnection($close = false)
     }
 
     $databaseConnectionParams = Ppf\getConfig('database');
-
     if ($databaseConnectionParams) {
         $dbConnection = dbConnect(
             $databaseConnectionParams['host'],

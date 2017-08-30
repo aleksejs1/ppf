@@ -17,8 +17,9 @@ function dbRealEscapeString($connection, $variable)
     return mysqli_real_escape_string($connection, $variable);
 }
 
-function dbQuery($connection, $sql)
+function dbQuery($sql)
 {
+    $connection = getDbConnection();
     return mysqli_query($connection, $sql);
 }
 

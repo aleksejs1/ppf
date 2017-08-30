@@ -6,12 +6,12 @@ use Components\Ppf;
 
 function getDbStructure() {
     $dbConnection = getDbConnection();
-    if ($result = dbQuery($dbConnection, 'SHOW TABLES;')) {
+    if ($result = dbQuery('SHOW TABLES;')) {
         $tables = dbFetchAll($result);
         dbFreeResult($result);
     }
     foreach ($tables as $table) {
-        if ($result = dbQuery($dbConnection, 'SHOW COLUMNS FROM ' . $table[0])) {
+        if ($result = dbQuery('SHOW COLUMNS FROM ' . $table[0])) {
             $fields = dbFetchAll($result);
         }
         $tableStructure = [
@@ -59,7 +59,7 @@ function getForeignKeysData($dbConnection)
                 WHERE CONSTRAINT_NAME = \''.$key[2].'\' AND 
                 TABLE_NAME = \''.$key[4].'\' 
                 AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
-        if ($result = dbQuery($dbConnection, $sql)) {
+        if ($result = dbQuery($sql)) {
             $data = dbFetchAll($result);
         }
     }
@@ -72,7 +72,7 @@ function getForeignKeys($dbConnection)
     $keys = [];
     $sql = 'SELECT * FROM information_schema.table_constraints 
             WHERE CONSTRAINT_TYPE = \'FOREIGN KEY\' AND TABLE_SCHEMA = \'' . Ppf\getConfig('database')['name'] . '\'';
-    if ($result = dbQuery($dbConnection, $sql)) {
+    if ($result = dbQuery($sql)) {
         $keys = dbFetchAll($result);
     }
 
