@@ -9,8 +9,10 @@ componentLoad('Database/QueryBuilder');
 componentLoad('Database/Repository');
 componentLoad('Database/StructureReader');
 
-// todo: make constructor
-initDatabase();
+function init()
+{
+    initDatabase();
+}
 
 function initDatabase()
 {

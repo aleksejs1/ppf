@@ -3,7 +3,7 @@
 namespace AppBundle\Controller;
 
 use Components\Response;
-use Components\TEngine;
+use Components\TemplateEngine;
 use Components\Database;
 use AppBundle\Service\Menu;
 
@@ -12,7 +12,7 @@ load('AppBundle/Service/Menu');
 function index()
 {
     $menu = Menu\getMenu();
-    $r = TEngine\render('default', [
+    $r = TemplateEngine\render('default', [
         'content' => 'it works',
         'menu' => $menu,
         'menu2' => [
@@ -41,7 +41,7 @@ function index()
 function ext()
 {
     $menu = Menu\getMenu();
-    $r = TEngine\render('extendsTest', [
+    $r = TemplateEngine\render('extendsTest', [
         'content' => 'it works',
         'menu' => $menu,
         'menu2' => [
@@ -58,11 +58,6 @@ function ext()
         ],
         'title' => 'Main'
     ]);
-
-//    db test
-//    print_r(Database\fetchOne('user', 2));
-//    print_r(Database\fetchOne('user', 4));
-//    Database\save('user', ['id' => 1, 'name' => rand(1,10)]);
 
     return Response\response($r);
 }

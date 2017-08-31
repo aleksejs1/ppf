@@ -2,6 +2,10 @@
 
 namespace Components\Ppf;
 
+function init()
+{
+}
+
 function getConfig($key)
 {
     global $config;

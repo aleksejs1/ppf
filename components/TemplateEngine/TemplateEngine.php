@@ -1,6 +1,10 @@
 <?php
 
-namespace Components\TEngine;
+namespace Components\TemplateEngine;
+
+function init()
+{
+}
 
 function render($templateName, $data)
 {

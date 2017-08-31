@@ -2,20 +2,36 @@
 
 namespace Components\Profiler;
 
-$timestamps = [];
+function init()
+{
+}
+
+function timestamps($action = 'get', $data = [])
+{
+    static $timestamps = [];
+
+    switch ($action) {
+        case 'get':
+            return $timestamps;
+            break;
+        case 'set':
+            $timestamps = $data;
+            break;
+    }
+}
 
 function saveStart()
 {
-    global $timestamps;
-
+    $timestamps = timestamps('get');
     $timestamps['start'] = round(microtime(true) * 1000);
+    timestamps('set', $timestamps);
 }
 
 function saveEnd(&$data)
 {
-    global $timestamps;
-
+    $timestamps = timestamps('get');
     $timestamps['end'] = round(microtime(true) * 1000);
+    timestamps('set', $timestamps);
 
     $fullTime = $timestamps['end'] - $timestamps['start'];
 

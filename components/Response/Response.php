@@ -5,6 +5,10 @@ namespace Components\Response;
 use Components\Ppf;
 use Components\Events;
 
+function init()
+{
+}
+
 function response($data, $format = null)
 {
 //    Events\doEvent('pre_response', 'test');

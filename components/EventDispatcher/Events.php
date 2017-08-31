@@ -2,23 +2,37 @@
 
 namespace Components\Events;
 
-$events = [];
+function init()
+{
+    foreach (getEventListeners() as $event => $listener) {
+        addListener($event, $listener);
+    }
+}
 
-foreach (getEventListeners() as $event => $listener) {
-    addListener($event, $listener);
+function events($action = 'get', $data = [])
+{
+    static $events = [];
+
+    switch ($action) {
+        case 'get':
+            return $events;
+        break;
+        case 'set':
+            $events = $data;
+        break;
+    }
 }
 
 function addListener($event, $listener)
 {
-    global $events;
-
+    $events = events('get');
     $events[$event][] = $listener;
+    events('set', $events);
 }
 
 function doEvent($event, &$data)
 {
-    global $events;
-
+    $events = events('get');
     if (!array_key_exists($event, $events)) {
         return;
     }

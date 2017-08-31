@@ -1,12 +1,12 @@
 <?php
 
-use Components\TEngine;
+use Components\TemplateEngine;
 
 include(__DIR__.'/../components/TemplateEngine/Tests.php');
 
 $results = [];
 
-$results['templateEngine'] = TEngine\runTests();
+$results['templateEngine'] = TemplateEngine\runTests();
 
 foreach ($results as $key => $result) {
     echo '<h2>'.$key.'</h2>';

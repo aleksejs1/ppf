@@ -4,6 +4,10 @@ namespace Components\HttpKernel;
 
 use Components\Events;
 
+function init()
+{
+}
+
 function httpHandle ($request)
 {
     Events\doEvent('kernel_request', $request);

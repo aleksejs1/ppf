@@ -4,6 +4,8 @@ namespace Components\Database;
 
 function fetchOne($table, $id)
 {
+
+    echo 'aa';
     $tableStructure = getTableStructure($table);
     $sql =
         renderSelectSql('*') .

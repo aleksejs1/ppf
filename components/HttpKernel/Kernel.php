@@ -28,11 +28,17 @@ function handle($request)
             trigger_error('Componen '.$component.' not found!' ,E_USER_ERROR);
         }
         include $file;
+        call_user_func_array(getInitFunction($component), []);
     }
 
     \Components\Events\addListener('pre_response', '\Components\Ppf\preResp');
 
     return \Components\HttpKernel\httpHandle($request);
+}
+
+function getInitFunction($component)
+{
+    return 'Components\\'.substr($component, strrpos($component, '/') + 1) . '\\init';
 }
 
 function getComponentPath(string $component) : string

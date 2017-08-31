@@ -1,6 +1,6 @@
 <?php
 
-namespace Components\TEngine;
+namespace Components\TemplateEngine;
 
 include('TemplateEngine.php');
 
